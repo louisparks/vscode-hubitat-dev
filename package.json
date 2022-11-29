@@ -1,0 +1,79 @@
+{
+  "name": "hubitat-dev",
+  "displayName": "Hubitat Developer Tools",
+  "description": "",
+  "version": "0.0.9",
+  "icon": "images/logo.png",
+  "publisher": "Louis Parks",
+  "repository": "https://github.com/louisparks/vscode-hubitat-dev",
+  "engines": {
+    "vscode": "^1.73.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:hubitat-dev.publish",
+    "onCommand:hubitat-dev.clearConfig",
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "hubitat-dev.publish",
+        "title": "Hubitat - Publish"
+      },
+      {
+        "command": "hubitat-dev.clearConfig",
+        "title": "Hubitat - Clear All Config"
+      }
+    ],
+    "configuration": {
+      "title": "Hubitat",
+      "properties": {
+        "hubitat.hub.hostname": {
+          "description": "Hostname (IP address) of the hubitat hub",
+          "type": "string",
+          "default": ""
+        },
+        "hubitat.misc.overwriteHubitatVersion": {
+          "type": "boolean",
+          "default": false,
+          "description": "Always update regardless of version"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "-vscode:prepublish": "npm run esbuild-base -- --minify",
+    "vscode:prepublish": "npm run compile",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+    "test-compile": "tsc -p ./",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.0.0",
+    "@types/mocha": "^10.0.0",
+    "@types/node": "16.x",
+    "@types/vscode": "^1.73.0",
+    "@typescript-eslint/eslint-plugin": "^5.42.0",
+    "@typescript-eslint/parser": "^5.42.0",
+    "@vscode/test-electron": "^2.2.0",
+    "esbuild": "^0.15.16",
+    "eslint": "^8.26.0",
+    "glob": "^8.0.3",
+    "mocha": "^10.1.0",
+    "typescript": "^4.8.4",
+    "vsce": "^2.14.0"
+  },
+  "dependencies": {
+    "typed-rest-client": "^1.8.9"
+  }
+}
