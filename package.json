@@ -1,0 +1,81 @@
+{
+  "name": "hubitat-dev",
+  "displayName": "hubitat-dev",
+  "description": "",
+  "version": "0.0.2",
+  "publisher": "ExpeedTechnologies",
+  "repository": "https://github.com/louisparks/vscode-hubitat-dev",
+  "engines": {
+    "vscode": "^1.73.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:hubitat-dev.publish",
+    "onCommand:hubitat-dev.clearConfig",
+    "*"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "hubitat-dev.publish",
+        "title": "Hubitat - Publish"
+      },
+      {
+        "command": "hubitat-dev.clearConfig",
+        "title": "Hubitat - Clear Config"
+      }
+    ],
+    "configuration": {
+      "title": "Hubitat",
+      "properties": {
+        "hubitat.createNewIfNotFound": {
+          "type": "boolean",
+          "default": true,
+          "description": "Create a new id if not found"
+        },
+        "hubitat.hostname": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Hostname of the hubitat hub"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "-vscode:prepublish": "npm run esbuild-base -- --minify",
+    "vscode:prepublish": "npm run compile",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+    "test-compile": "tsc -p ./",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.0.0",
+    "@types/mocha": "^10.0.0",
+    "@types/node": "16.x",
+    "@types/vscode": "^1.73.0",
+    "@typescript-eslint/eslint-plugin": "^5.42.0",
+    "@typescript-eslint/parser": "^5.42.0",
+    "@vscode/test-electron": "^2.2.0",
+    "esbuild": "^0.15.16",
+    "eslint": "^8.26.0",
+    "glob": "^8.0.3",
+    "mocha": "^10.1.0",
+    "typescript": "^4.8.4",
+    "vsce": "^2.14.0"
+  },
+  "dependencies": {
+    "typed-rest-client": "^1.8.9"
+  }
+}
