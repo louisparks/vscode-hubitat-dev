@@ -3,7 +3,7 @@
   "displayName": "hubitat-dev",
   "description": "",
   "version": "0.0.1",
-  "publisher":"ExpeedTechnologies",
+  "publisher": "ExpeedTechnologies",
   "repository": "https://github.com/louisparks/vscode-hubitat-dev",
   "engines": {
     "vscode": "^1.73.0"
@@ -27,7 +27,25 @@
         "command": "hubitat-dev.clearConfig",
         "title": "Hubitat - Clear Config"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Hubitat",
+      "properties": {
+        "hubitat.createNewIfNotFound": {
+          "type": "boolean",
+          "default": true,
+          "description": "Create a new id if not found"
+        },
+        "hubitat.hostname": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Hostname of the hubitat hub"
+        }
+      }
+    }
   },
   "scripts": {
     "-vscode:prepublish": "npm run esbuild-base -- --minify",

@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
 import { HubitatConfigManager } from './config';
 import { HubitatClient, PublishStatus } from './hubitat';
 
-let myStatusBarItem: vscode.StatusBarItem;
+let hubitatStatusBarItem: vscode.StatusBarItem;
 let configManager: HubitatConfigManager;
 
 // This method is called when your extension is activated
@@ -30,17 +30,17 @@ export function activate(context: vscode.ExtensionContext) {
   configManager = new HubitatConfigManager(context);
 
   //status bar
-  myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1000);
-  myStatusBarItem.command = myCommandId;
-  context.subscriptions.push(myStatusBarItem);
+  hubitatStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1000);
+  hubitatStatusBarItem.command = myCommandId;
+  context.subscriptions.push(hubitatStatusBarItem);
   context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(updateStatusBarItem));
   updateStatusBarItem();
 }
 
 function updateStatusBarItem(): void {
   const codeFile = configManager.lookupCodeFile(vscode.window.activeTextEditor?.document.uri.path!);
-  myStatusBarItem.text = `$(home) Hubitat id ${codeFile?.id}`;
-  myStatusBarItem.show();
+  hubitatStatusBarItem.text = `$(home) Hubitat ${configManager.getActiveHub()} id ${codeFile?.id}`;
+  hubitatStatusBarItem.show();
 }
 
 async function publish(context: vscode.ExtensionContext) {
@@ -68,6 +68,7 @@ async function publish(context: vscode.ExtensionContext) {
     const id = await promptUserForFileId();
     codeFile!.id = Number(id);
   }
+
 
 
   const result = await hubitat.publish(codeFile!);

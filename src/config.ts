@@ -68,4 +68,9 @@ export class HubitatConfigManager {
   save(config: HubitatConfiguration) {
     this.context.workspaceState.update("hubitatConfig", config);
   }
+
+  getActiveHub(): string | null {
+    let host = this.context.workspaceState.get("hubitatHostname") as string | null;
+    return host;
+  }
 }
