@@ -7,7 +7,6 @@ import * as utils from './Utils';
 import { HubitatCodeFile, HubitatConfigManager } from './ConfigManager';
 import { HubitatClient, PublishErrorReason, PublishStatus } from './HubitatClient';
 import { logger } from './Logger';
-import { config } from 'process';
 
 let hubitatStatusBarItem: vscode.StatusBarItem;
 let configManager: HubitatConfigManager;
@@ -55,8 +54,7 @@ function statusBarStartSpinning(): void {
 }
 
 
-async function publish(context: vscode.ExtensionContext, force = false) {
-
+export async function publish(context: vscode.ExtensionContext, force = false) {
   if (!(await hasHubConfigured())) {
     vscode.window.showErrorMessage("hub address required for publishing");
     return;
@@ -100,6 +98,8 @@ async function publishExistingFile(codeFile: HubitatCodeFile, force: boolean) {
     const message = `Hubitat - Successfully published ${filename}`;
     vscode.window.showInformationMessage(message);
     configManager.saveCodeFile(result.codeFile);
+    updateStatusBarItem();
+
   } else {
     logger.warn(`failed to publish ${filename}\n${result.errorMessage}`);
     if (result.errorReason === PublishErrorReason.duplicate) {
@@ -123,7 +123,7 @@ async function callWithSpinner(callback: Function) {
     logger.error("Unknonwn error occured ", error);
   }
   finally {
-    updateStatusBarItem();
+    //updateStatusBarItem();
   }
 }
 
@@ -148,7 +148,7 @@ async function promptUserForHubitatHostname(): Promise<string | undefined> {
   return hubitatHostInput;
 }
 
-export async function promptUserForFileId(): Promise<number | undefined> {
+async function promptUserForFileId(): Promise<number | undefined> {
   const result = await vscode.window.showInputBox({
     value: undefined,
     title: "Enter ID",

@@ -84,10 +84,15 @@ export class HubitatClient {
 
     async loadExistingCodeFromHubitat(codeFile: HubitatCodeFile): Promise<HubitatCodeFile | undefined> {
         try {
-            let infoRes: rm.IRestResponse<CodeResponse> = await this.rest.get<CodeResponse>(`/${codeFile.codeType}/ajax/code`, { queryParameters: { params: { "id": String(codeFile.id) } } });
+
+            let infoRes = await this.http.get(`http://${this.configManager.getActiveHub()}/${codeFile.codeType}/ajax/code`, { queryParameters: { params: { "id": String(codeFile.id) } } });
             //Apps return 200 with empty payload even when not found, so lets check the id matches too.
-            if (infoRes.statusCode === 200 && infoRes.result?.id === codeFile.id) {
-                return { id: infoRes.result?.id as number, filepath: codeFile.filepath, version: infoRes.result?.version as number, codeType: codeFile.codeType };
+            if (infoRes.message.statusCode === 200) {
+                const codeResponse = JSON.parse(await infoRes.readBody()) as CodeResponse;
+                return { id: codeResponse?.id, filepath: codeFile.filepath, version: codeResponse?.version, codeType: codeFile.codeType };
+            }
+            else if (infoRes.message.statusCode === 302 && infoRes.message.headers.location?.includes("loginRedirect")) {
+                logger.debug("access denied");
             }
         }
         catch (error: any) {
@@ -121,5 +126,6 @@ export class HubitatClient {
         }).join("&");
         return form;
     }
+
 }
 

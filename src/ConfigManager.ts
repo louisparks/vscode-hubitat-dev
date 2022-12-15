@@ -3,8 +3,8 @@ import { TextEncoder } from 'util';
 import * as vscode from 'vscode';
 import { logger } from './Logger';
 
-const HUBITAT_CONFIG_KEY = "hubitatConfig";
-const HUB_HOSTNAME_KEY = "hubitat.hub.hostname";
+export const HUBITAT_CONFIG_KEY = "hubitatConfig";
+export const HUB_HOSTNAME_KEY = "hubitat.hub.hostname";
 const FORCE_HUBITAT_UPDATE = "hubitat.misc.overwriteHubitatVersion";
 const CONFIG_FILENAME = "metadata.json";
 const CONFIG_DIR = ".hubitat";
