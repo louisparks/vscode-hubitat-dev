@@ -19,7 +19,7 @@ const CANCEL_MESSAGE = "Do nothing";
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-  logger.info('hubitat-developement extension is now active!');
+  logger.info('hubitat-developement extension is now active!!');
 
   context.subscriptions.push(vscode.commands.registerCommand('hubitat-dev.publish', (uri: vscode.Uri) => {
     publish(context);
@@ -42,6 +42,10 @@ function configureStatusBar(context: vscode.ExtensionContext) {
 }
 
 async function updateStatusBarItem() {
+  if (!vscode.window.activeTextEditor?.document.uri.fsPath.endsWith(".groovy")) {
+    hubitatStatusBarItem.hide();
+    return;
+  }
   if (vscode.window.activeTextEditor?.document.uri && vscode.window.activeTextEditor?.document.uri.scheme === 'file') {
     const codeFile = await configManager.lookupCodeFile(vscode.window.activeTextEditor?.document.uri.path);
     const type = await configManager.determineCodeTypeByContent(codeFile?.filepath || vscode.window.activeTextEditor?.document.uri.path);
@@ -75,7 +79,7 @@ async function publish(context: vscode.ExtensionContext, force = false) {
   }
   else {
     await callWithSpinner(async () => {
-      publishExistingFile(codeFile!, false);
+      await publishExistingFile(codeFile!, false);
     });
   }
 }
@@ -88,6 +92,8 @@ async function addNewCodeFile(document: vscode.TextDocument) {
     if (savedFile) {
       vscode.window.showInformationMessage(`Hubitat - Created new ${savedFile.codeType} for ${utils.getFilename(document)} [${savedFile.id}]`);
       await configManager.saveCodeFile(savedFile);
+    } else {
+      vscode.window.showInformationMessage(`Hubitat - Error publishing file ${utils.getFilename(document)}`);
     }
   });
 }

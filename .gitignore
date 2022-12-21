@@ -5,3 +5,5 @@ node_modules
 *.vsix
 notes
 .yarn/cache
+src/test/samples/.hubitat/metadata.json
+.hubitat/metadata.json

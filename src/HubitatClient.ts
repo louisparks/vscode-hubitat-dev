@@ -4,6 +4,7 @@ import * as hm from 'typed-rest-client/HttpClient';
 import * as vscode from 'vscode';
 import { CodeType, HubitatCodeFile, HubitatConfigManager } from './ConfigManager';
 import { logger } from './Logger';
+import { parse } from 'node-html-parser';
 
 interface CodeResponse {
     id: number;
@@ -107,7 +108,9 @@ export class HubitatClient {
                 const newId = updateResponse.message.headers.location?.split("/").pop();
                 return { ...codeFile, id: Number(newId), version: 1 };
             }
-            logger.warn(`could not create new [${codeFile.codeType}] ${codeFile.filepath} http: [${updateResponse.message.statusCode}] [${updateResponse.message.statusMessage}]`);
+            const errorMessage = this.parseCreateNewErrorFromHTML(await updateResponse.readBody());
+            logger.warn(`could not create new [${codeFile.codeType}] ${codeFile.filepath} errorMessage:[${errorMessage}] http: [${updateResponse.message.statusCode}] [${updateResponse.message.statusMessage}]`);
+
         }
         catch (error: any) {
             logger.error("unknown error creating new code file:", error);
@@ -121,5 +124,19 @@ export class HubitatClient {
         }).join("&");
         return form;
     }
+
+    private parseCreateNewErrorFromHTML(responseBody: string): string {
+        try {
+            const html = parse(responseBody);
+            const errors = html.querySelector('#errors');
+            const errorMessage = errors?.textContent.trim() || "unparseable";
+            return errorMessage;
+        }
+        catch (error) {
+            logger.error("error", error);
+        }
+        return "UNKOWN";
+    }
+
 }
 

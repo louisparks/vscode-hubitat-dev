@@ -30,13 +30,7 @@ This extension contributes the following settings:
 Only works on hubs with "Hub Login Security" turned off.  It should be possible to do the authorization in the future, but it's not in this first release.
 ## Release Notes
 
-### 1.0.0
-
-Initial release of Hubitat Developer
-
-### 1.0.1
-
-Fixed issue #.
+See CHANGELOG.md
 
 ## For more information
 
