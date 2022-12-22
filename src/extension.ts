@@ -4,10 +4,9 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as utils from './Utils';
-import { HubitatCodeFile, HubitatConfigManager } from './ConfigManager';
+import { CodeType, HubitatCodeFile, HubitatConfigManager } from './ConfigManager';
 import { HubitatClient, PublishErrorReason, PublishStatus } from './HubitatClient';
 import { logger } from './Logger';
-import { config } from 'process';
 
 let hubitatStatusBarItem: vscode.StatusBarItem;
 let configManager: HubitatConfigManager;
@@ -71,15 +70,28 @@ async function publish(context: vscode.ExtensionContext, force = false) {
     await document.save();
   }
 
+
+
   let codeFile = await configManager.lookupCodeFile(document?.uri.path!);
   if (!codeFile || !(await hubitatClient.loadExistingCodeFromHubitat(codeFile))) {
+    const codeType = await configManager.determineCodeType(document?.uri.path!);
+    const existingId = await promptUserForFileId(codeType!);
+    if (existingId === undefined) {
+      return;
+    }
+    else {
+      codeFile = { filepath: document?.uri.path!, id: existingId, codeType: await configManager.determineCodeTypeByContent(document?.uri.path!) };
+      force = true;
+    }
+  }
+  if (codeFile) {
     await callWithSpinner(async () => {
-      await addNewCodeFile(document!);
+      await publishExistingFile(codeFile!, force);
     });
   }
   else {
     await callWithSpinner(async () => {
-      await publishExistingFile(codeFile!, false);
+      await addNewCodeFile(document!);
     });
   }
 }
@@ -87,15 +99,13 @@ async function publish(context: vscode.ExtensionContext, force = false) {
 async function addNewCodeFile(document: vscode.TextDocument) {
   const documentPath = document.uri.path;
   let newCodeFile = { filepath: documentPath, source: document?.getText(), codeType: await configManager.determineCodeType(documentPath) };
-  await callWithSpinner(async () => {
-    const savedFile = await (hubitatClient.createNewCodeOnHubitat(newCodeFile));
-    if (savedFile) {
-      vscode.window.showInformationMessage(`Hubitat - Created new ${savedFile.codeType} for ${utils.getFilename(document)} [${savedFile.id}]`);
-      await configManager.saveCodeFile(savedFile);
-    } else {
-      vscode.window.showInformationMessage(`Hubitat - Error publishing file ${utils.getFilename(document)}`);
-    }
-  });
+  const savedFile = await (hubitatClient.createNewCodeOnHubitat(newCodeFile));
+  if (savedFile) {
+    vscode.window.showInformationMessage(`Hubitat - Created new ${savedFile.codeType} for ${utils.getFilename(document)} [${savedFile.id}]`);
+    await configManager.saveCodeFile(savedFile);
+  } else {
+    vscode.window.showInformationMessage(`Hubitat - Error publishing file ${utils.getFilename(document)}`);
+  }
 }
 
 async function publishExistingFile(codeFile: HubitatCodeFile, force: boolean) {
@@ -154,17 +164,24 @@ async function promptUserForHubitatHostname(): Promise<string | undefined> {
   return hubitatHostInput;
 }
 
-export async function promptUserForFileId(): Promise<number | undefined> {
-  const result = await vscode.window.showInputBox({
-    value: undefined,
-    title: "Enter ID",
-    placeHolder: 'Existing id for this file...',
-    ignoreFocusOut: true,
-    validateInput: text => {
-      return isNaN(Number(text)) ? 'Invalid Id' : null;
+export async function promptUserForFileId(codeType: CodeType): Promise<number | undefined> {
+  if (codeType) {
+    const result = await vscode.window.showInputBox({
+      value: undefined,
+      title: `You have not published this ${codeType} before. If it already exists, you may enter the id below, this will overwrite existing ${codeType}`,
+      placeHolder: `empty to create a new ${codeType}`,
+      ignoreFocusOut: true,
+      validateInput: text => {
+        return isNaN(Number(text)) ? 'Invalid Id' : null;
+      }
+    });
+    if (result === undefined) {
+      return undefined;
     }
-  });
-  return Number(result);
+    return Number(result);
+  } else {
+    vscode.window.showErrorMessage(`Unable to determine file type (app,driver,library)`);
+  }
 }
 
 export function deactivate() {
