@@ -2,7 +2,7 @@
   "name": "hubitat-dev",
   "displayName": "Hubitat Developer Tools",
   "description": "",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "icon": "images/logo.png",
   "publisher": "Louis Parks",
   "repository": "https://github.com/louisparks/vscode-hubitat-dev",

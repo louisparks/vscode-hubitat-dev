@@ -69,22 +69,22 @@ async function publish(context: vscode.ExtensionContext, force = false) {
   if (document?.isDirty) {
     await document.save();
   }
-
-
+  const codeType = await configManager.determineCodeType(document?.uri.path!);
 
   let codeFile = await configManager.lookupCodeFile(document?.uri.path!);
-  if (!codeFile || !(await hubitatClient.loadExistingCodeFromHubitat(codeFile))) {
-    const codeType = await configManager.determineCodeType(document?.uri.path!);
+  let currentFileOnHubitat = codeFile ? await hubitatClient.loadExistingCodeFromHubitat(codeFile) : undefined;
+
+  if (!codeFile || !currentFileOnHubitat) {
     const existingId = await promptUserForFileId(codeType!);
     if (existingId === undefined) {
       return;
     }
-    else {
-      codeFile = { filepath: document?.uri.path!, id: existingId, codeType: await configManager.determineCodeTypeByContent(document?.uri.path!) };
+    else if (existingId > 0) {
+      codeFile = { filepath: document?.uri.path!, id: existingId, codeType: codeType };
       force = true;
     }
   }
-  if (codeFile) {
+  if (codeFile && currentFileOnHubitat) {
     await callWithSpinner(async () => {
       await publishExistingFile(codeFile!, force);
     });

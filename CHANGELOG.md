@@ -4,6 +4,12 @@ All notable changes to the "hubitat-dev" extension will be documented in this fi
 
 ## [Unreleased]
 
+
+## [0.0.12]
+
+### Added
+- Fixed a regression producing an error when adding a new file
+
 ## [0.0.11]
 
 ### Added
