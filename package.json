@@ -2,7 +2,7 @@
   "name": "hubitat-dev",
   "displayName": "Hubitat Developer Tools",
   "description": "",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "icon": "images/logo.png",
   "publisher": "Louis Parks",
   "repository": "https://github.com/louisparks/vscode-hubitat-dev",
@@ -27,13 +27,30 @@
       {
         "command": "hubitat-dev.clearConfig",
         "title": "Hubitat - Clear All Config"
+      },
+      {
+        "command": "hubitat-dev.checkHubConnection",
+        "title": "Hubitat - Check Hub Connection"
       }
     ],
     "configuration": {
       "title": "Hubitat",
       "properties": {
         "hubitat.hub.hostname": {
+          "order": 5,
           "description": "Hostname (IP address) of the hubitat hub",
+          "type": "string",
+          "default": ""
+        },
+        "hubitat.hub.username": {
+          "order": 10,
+          "description": "username",
+          "type": "string",
+          "default": ""
+        },
+        "hubitat.hub.password": {
+          "order": 20,
+          "description": "password",
           "type": "string",
           "default": ""
         },
@@ -74,7 +91,7 @@
     "vsce": "^2.14.0"
   },
   "dependencies": {
-    "node-html-parser": "^6.1.4",
-    "typed-rest-client": "^1.8.9"
+    "axios": "^1.2.1",
+    "node-html-parser": "^6.1.4"
   }
 }

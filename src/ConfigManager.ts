@@ -5,6 +5,9 @@ import { logger } from './Logger';
 
 const HUBITAT_CONFIG_KEY = "hubitatConfig";
 const HUB_HOSTNAME_KEY = "hubitat.hub.hostname";
+const HUB_USERNAME_KEY = "hubitat.hub.username";
+const HUB_PASSWORD_KEY = "hubitat.hub.password";
+
 const FORCE_HUBITAT_UPDATE = "hubitat.misc.overwriteHubitatVersion";
 const CONFIG_FILENAME = "metadata.json";
 const CONFIG_DIR = ".hubitat";
@@ -26,6 +29,12 @@ export interface HubitatCodeFile {
   id?: number;
   version?: number;
   source?: string;
+}
+
+export interface HubInfo {
+  host?: string;
+  username?: string;
+  password?: string
 }
 
 export class HubitatConfigManager {
@@ -88,9 +97,11 @@ export class HubitatConfigManager {
     return undefined;
   }
 
-  getActiveHub(): string | undefined {
+  getActiveHubInfo(): HubInfo {
     const host = vscode.workspace.getConfiguration().get(HUB_HOSTNAME_KEY) as string;
-    return host;
+    const username = vscode.workspace.getConfiguration().get(HUB_USERNAME_KEY) as string;
+    const password = vscode.workspace.getConfiguration().get(HUB_PASSWORD_KEY) as string;
+    return { host: host, username: username, password: password };
   }
 
   setActiveHub(hostname: string) {
