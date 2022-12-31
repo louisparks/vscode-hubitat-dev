@@ -8,5 +8,5 @@ library(
 )
 
 void testStub1() {
-  log.debug('I am a sample library')';'
+  log.debug('I am a sample library')
 }

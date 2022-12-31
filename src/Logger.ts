@@ -13,13 +13,14 @@ export class Logger {
         this.log("warn", message);
     }
     error(message: string, error: any) {
-        this.log("error", message + error.message);
+        let fullMessage = message;
         if (error instanceof Error) {
-            this.log("error", error.message);
+            fullMessage = `${fullMessage} [${error.message}]`;
         }
+        this.log("error", fullMessage);
     }
     private log(level: string, message: string) {
-        const timestamp: string = new Date().toISOString()
+        const timestamp: string = new Date().toISOString();
         outputChannel.appendLine(`[${level}] ${timestamp}] ${message}`);
     }
 }

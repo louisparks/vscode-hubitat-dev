@@ -4,10 +4,16 @@ All notable changes to the "hubitat-dev" extension will be documented in this fi
 
 ## [Unreleased]
 
+## [0.0.13]
+
+### Added
+- Support for security enabled hubs
+### Changed
+- Fixed the ablity to specify an existing id for a file
 
 ## [0.0.12]
 
-### Added
+### Changed
 - Fixed a regression producing an error when adding a new file
 
 ## [0.0.11]

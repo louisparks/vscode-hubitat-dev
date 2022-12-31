@@ -5,7 +5,7 @@
 import * as vscode from 'vscode';
 import * as utils from './Utils';
 import { CodeType, HubitatCodeFile, HubitatConfigManager } from './ConfigManager';
-import { HubitatClient, PublishErrorReason, PublishStatus } from './HubitatClient';
+import { HubConnectionStatus, HubitatClient, PublishErrorReason, PublishStatus } from './HubitatClient';
 import { logger } from './Logger';
 
 let hubitatStatusBarItem: vscode.StatusBarItem;
@@ -28,6 +28,25 @@ export function activate(context: vscode.ExtensionContext) {
     configManager.clear();
   }));
 
+  context.subscriptions.push(vscode.commands.registerCommand('hubitat-dev.checkHubConnection', async (resource) => {
+    const result = await hubitatClient.checkHubConnection();
+    if (result.status === HubConnectionStatus.success) {
+      vscode.window.showInformationMessage(`successfully connected to hub ${result.hubData?.name} at ${result.hubData?.ipAddress}`);
+    }
+    else {
+      vscode.window.showErrorMessage(`error connecting to hub at ${configManager.getActiveHubInfo().host} reason ${result.reason}`);
+    }
+    logger.info("checking hub connection" + JSON.stringify(result));
+  }));
+
+  vscode.workspace.onDidChangeConfiguration(event => {
+    logger.info("detected settings changes reloading clients");
+    initClients(context);
+  });
+  initClients(context);
+
+}
+function initClients(context: vscode.ExtensionContext) {
   configManager = new HubitatConfigManager(context);
   hubitatClient = new HubitatClient(configManager);
   configureStatusBar(context);
@@ -48,7 +67,7 @@ async function updateStatusBarItem() {
   if (vscode.window.activeTextEditor?.document.uri && vscode.window.activeTextEditor?.document.uri.scheme === 'file') {
     const codeFile = await configManager.lookupCodeFile(vscode.window.activeTextEditor?.document.uri.path);
     const type = await configManager.determineCodeTypeByContent(codeFile?.filepath || vscode.window.activeTextEditor?.document.uri.path);
-    hubitatStatusBarItem.text = `$(home) Hubitat ${configManager.getActiveHub() || "N/A"} ${type} ${codeFile?.id || "not published"}`;
+    hubitatStatusBarItem.text = `$(home) Hubitat ${configManager.getActiveHubInfo().host || "N/A"} ${type} ${codeFile?.id || "not published"}`;
     hubitatStatusBarItem.show();
   }
 }
@@ -81,6 +100,7 @@ async function publish(context: vscode.ExtensionContext, force = false) {
     }
     else if (existingId > 0) {
       codeFile = { filepath: document?.uri.path!, id: existingId, codeType: codeType };
+      currentFileOnHubitat = await hubitatClient.loadExistingCodeFromHubitat(codeFile);
       force = true;
     }
   }
@@ -99,12 +119,12 @@ async function publish(context: vscode.ExtensionContext, force = false) {
 async function addNewCodeFile(document: vscode.TextDocument) {
   const documentPath = document.uri.path;
   let newCodeFile = { filepath: documentPath, source: document?.getText(), codeType: await configManager.determineCodeType(documentPath) };
-  const savedFile = await (hubitatClient.createNewCodeOnHubitat(newCodeFile));
-  if (savedFile) {
-    vscode.window.showInformationMessage(`Hubitat - Created new ${savedFile.codeType} for ${utils.getFilename(document)} [${savedFile.id}]`);
-    await configManager.saveCodeFile(savedFile);
+  const result = await (hubitatClient.createNewCodeOnHubitat(newCodeFile));
+  if (result.status === PublishStatus.success) {
+    vscode.window.showInformationMessage(`Hubitat - Created new ${result.codeFile.codeType} for ${utils.getFilename(document)} [${result.codeFile.id}]`);
+    await configManager.saveCodeFile(result.codeFile);
   } else {
-    vscode.window.showInformationMessage(`Hubitat - Error publishing file ${utils.getFilename(document)}`);
+    vscode.window.showErrorMessage(`Hubitat - Error publishing file ${utils.getFilename(document)} [${result.errorMessage}]`);
   }
 }
 
@@ -144,7 +164,7 @@ async function callWithSpinner(callback: Function) {
 }
 
 async function hasHubConfigured(): Promise<boolean> {
-  let host = configManager.getActiveHub();
+  let host = configManager.getActiveHubInfo().host;
   if (!host) {
     host = await promptUserForHubitatHostname();
     if (host) {
