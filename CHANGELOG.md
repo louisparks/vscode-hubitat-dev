@@ -4,6 +4,10 @@ All notable changes to the "hubitat-dev" extension will be documented in this fi
 
 ## [Unreleased]
 
+## [0.0.14]
+### Changed
+- Changed hub timeout from 5 to 10 seconds to handle larger drivers/apps
+
 ## [0.0.13]
 
 ### Added
