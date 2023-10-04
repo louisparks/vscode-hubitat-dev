@@ -73,7 +73,7 @@ export class HubitatClient {
   createNewClient(cookies: any = {}) {
     const httpClient = axios.create({
       baseURL: `http://${this.hubInfo.host}`,
-      timeout: 10000,
+      timeout: 15000,
       maxRedirects: 0,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded', ...cookies },

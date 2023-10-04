@@ -27,7 +27,7 @@ This extension contributes the following settings:
 * `hubitat.misc.overwriteHubitatVersion`: Set to `true` to always overwrite the version on the hubitat.
 
 ## Known Issues
-Only works on hubs with "Hub Login Security" turned off.  It should be possible to do the authorization in the future, but it's not in this first release.
+None
 ## Release Notes
 
 See CHANGELOG.md
