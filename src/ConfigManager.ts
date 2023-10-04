@@ -7,6 +7,7 @@ const HUBITAT_CONFIG_KEY = "hubitatConfig";
 const HUB_HOSTNAME_KEY = "hubitat.hub.hostname";
 const HUB_USERNAME_KEY = "hubitat.hub.username";
 const HUB_PASSWORD_KEY = "hubitat.hub.password";
+const HUB_NETWORK_TIMEOUT_KEY = "hubitat.hub.networkTimeout";
 
 const FORCE_HUBITAT_UPDATE = "hubitat.misc.overwriteHubitatVersion";
 const CONFIG_FILENAME = "metadata.json";
@@ -34,7 +35,8 @@ export interface HubitatCodeFile {
 export interface HubInfo {
   host?: string;
   username?: string;
-  password?: string
+  password?: string;
+  networkTimeout?: number;
 }
 
 export class HubitatConfigManager {
@@ -101,7 +103,8 @@ export class HubitatConfigManager {
     const host = vscode.workspace.getConfiguration().get(HUB_HOSTNAME_KEY) as string;
     const username = vscode.workspace.getConfiguration().get(HUB_USERNAME_KEY) as string;
     const password = vscode.workspace.getConfiguration().get(HUB_PASSWORD_KEY) as string;
-    return { host: host, username: username, password: password };
+    const timeout = vscode.workspace.getConfiguration().get(HUB_NETWORK_TIMEOUT_KEY) as number;
+    return { host: host, username: username, password: password, networkTimeout: timeout };
   }
 
   setActiveHub(hostname: string) {

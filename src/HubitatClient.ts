@@ -1,9 +1,9 @@
 
+import axios, { Axios } from 'axios';
+import { parse } from 'node-html-parser';
 import * as vscode from 'vscode';
 import { HubInfo, HubitatCodeFile, HubitatConfigManager } from './ConfigManager';
 import { logger } from './Logger';
-import { parse } from 'node-html-parser';
-import axios, { Axios } from 'axios';
 import { isLoginRedirect } from './Utils';
 
 interface CodeResponse {
@@ -73,7 +73,7 @@ export class HubitatClient {
   createNewClient(cookies: any = {}) {
     const httpClient = axios.create({
       baseURL: `http://${this.hubInfo.host}`,
-      timeout: 15000,
+      timeout: this.hubInfo.networkTimeout ?? 15000,
       maxRedirects: 0,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded', ...cookies },
